@@ -1,24 +1,28 @@
 import operator
 import math
 
+
 class Vector(object):
-    __slots__ = ('dimension', )
+    __slots__ = ('dimension', '_coordinates')
+
+    def __init__(self, *args):
+        self._coordinates = list(args)
 
     def __repr__(self):
-        return "<{}: {}>".format(self.__class__.__name__, self.coodinates)
+        return "<{}: {}>".format(self.__class__.__name__, self.coordinates)
 
     def __getitem__(self, index):
         raise NotImplementedError
 
-    def __setitem(self, index, value):
+    def __setitem__(self, index, value):
         raise NotImplementedError
 
     @property
-    def coodinates(self):
-        return [self[i] for i in range(self.dimension)]
+    def coordinates(self):
+        return self._coordinates
 
     def norm(self):
-        return math.sqrt(sum(p ** 2 for p in self.coodinates))
+        return math.sqrt(sum(p ** 2 for p in self.coordinates))
 
     def normalize(self):
         norm = self.norm()
@@ -29,14 +33,14 @@ class Vector(object):
         return self
 
     def __process_number_operation__(self, other, operation):
-        points = [operation(p, other) for p in self.coodinates]
+        points = [operation(p, other) for p in self.coordinates]
         return self.__class__(*points)
 
     def __process_vector_operation__(self, other, operation):
         if self.dimension != other.dimension:
             raise ValueError("Invalid dimension")
 
-        points = [operation(p1, p2) for p1, p2 in zip(self.coodinates, other.coodinates)]
+        points = [operation(p1, p2) for p1, p2 in zip(self.coordinates, other.coordinates)]
 
         return self.__class__(*points)
 
@@ -76,55 +80,111 @@ class Vector(object):
         return self.__mul__(other)
 
 
-
 class Vector2(Vector):
-    __slots__ = Vector.__slots__ + ('x', 'y')
+    __slots__ = Vector.__slots__
+
     def __init__(self, x=0, y=0):
-        self.x = x
-        self.y = y
+        super(Vector2, self).__init__(x, y)
         self.dimension = 2
+
+    @property
+    def x(self):
+        return self._coordinates[0]
+
+    @property
+    def y(self):
+        return self._coordinates[1]
 
     def __getitem__(self, index):
         assert index < self.dimension
-        return self.x if index <= 0 else self.y
+        return self._coordinates[index]
 
     def __setitem__(self, index, value):
         assert index < self.dimension
-        if index <= 0:
-            self.x = value
-        else:
-            self.y = value
-
+        self._coordinates[index] = value
 
 
 class Vector3(Vector):
-    __slots__ = Vector.__slots__ + ('x' , 'y', 'z')
+    __slots__ = Vector.__slots__
 
     def __init__(self, x=0, y=0, z=0):
-        self.x = x
-        self.y = y
-        self.z = z
+        super(Vector3, self).__init__(x, y, z)
         self.dimension = 3
 
+    @property
+    def x(self):
+        return self._coordinates[0]
+
+    @property
+    def y(self):
+        return self._coordinates[1]
+
+    @property
+    def z(self):
+        return self._coordinates[2]
 
     def __getitem__(self, index):
         assert index < self.dimension
-        if index <= 0:
-            return self.x
-        elif index == 1:
-            return self.y
-        else:
-            return self.z
+        return self._coordinates[index]
 
     def __setitem__(self, index, value):
         assert index < self.dimension
-        if index <= 0:
-            self.x = value
-        elif index == 1:
-            self.y = value
-        else:
-            self.z = value
+        self._coordinates[index] = value
 
+
+class Sphere(object):
+    __slots__ = ('center', 'radius')
+
+    def __init__(self, center, radius):
+        self.center = center
+        self.radius = radius
+
+
+    def _habr_ray_intersect(self, origin, dir):
+        L = self.center - origin
+        tca = L * dir
+        d2 = L * L - tca * tca
+        if d2 > self.radius ** 2:
+            return False
+
+        thc = math.sqrt(self.radius**2 - d2)
+        t0 = tca - thc
+        t1 = tca + thc
+
+        if t0 < 0:
+            t0 = t1
+
+        if t0 < 0:
+            return False
+
+        return True
+
+    def _ray_intersect(self, origin, dir):
+        # vector from origin to sphere center
+        v = self.center - origin
+
+        pc = (dir * v) * dir
+
+        dist = abs(pc * pc - v * v)
+
+        if dist > self.radius ** 2:
+            return False
+
+        di1 = math.sqrt(self.radius ** 2 - dist)
+
+
+
+
+        return True
+
+    def ray_intersect(self, origin, dir):
+        # habr = self._habr_ray_intersect(origin, dir)
+        my = self._ray_intersect(origin, dir)
+
+        # if habr != my:
+        #     print("DIFF: ", origin, dir, habr, my)
+
+        return my
 
 if __name__ == "__main__":
     v1 = Vector2(1, 0)
@@ -141,9 +201,9 @@ if __name__ == "__main__":
     print(v1 + v2)
     print(v1 + 1)
 
-
     v1 = Vector2(3, 4)
     print(v1.normalize())
+
 
 
 
