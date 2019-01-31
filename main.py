@@ -1,9 +1,10 @@
 import itertools
 import sys
 import math
+import time
 
-from geometry import Vector3, Sphere
 
+from entities import Vector2, Vector3, Sphere, Material, Light
 
 def _chanel_color(v, chanel):
     return int(255 * max(0, min(1, v[chanel])))
@@ -14,31 +15,71 @@ def get_color(v: Vector3):
     return r, g, b
 
 
-def cast_ray(orig: Vector3, destination: Vector3, sphere: Sphere):
+def scene_intersct(orig, dir, spheres):
+    intersects = False
+    hit, normal, material = None, None, None
+    distance = sys.maxsize
+
+    for sphere in sorted(spheres, key=lambda s: -(s.center.z + s.radius)):
+        intersect, sphere_distance = sphere.ray_intersect(orig, dir)
+        if intersect and sphere_distance < distance:
+            distance = sphere_distance
+            hit = orig + dir * sphere_distance
+            normal = (hit - sphere.center).normalize()
+            material = sphere.material
+            break
+
+    return distance < 1000, hit, normal, material
+
+
+
+def cast_ray(orig: Vector3, destination: Vector3, spheres: [Sphere]):
     sphere_dist = sys.maxsize
 
-    if not sphere.ray_intersect(orig, destination):
+    lights = [
+        Light(Vector3(-20, 20,  20), 1.5)
+    ]
+
+    intersects, *result = scene_intersct(orig, destination, spheres)
+    if not intersects:
         return Vector3(0.2, 0.7, 0.8)
 
-    return Vector3(0.4, 0.4, 0.4)
+    hit, normal, material = result
+
+    light_intensity = 0.0
+
+    for ligth in lights:
+        light_dir = (ligth.position - hit).normalize()
+        light_intensity += ligth.intensity * max(0, light_dir * normal)    
+
+    return material.diffuse_color * light_intensity
 
 
 def render(width, height) -> bytes:
     frame_buffer = [None] * (width * height)
 
-    fov = math.pi / 2.
+    fov_hor = math.pi / 2.
+    fov_vert = 2 * math.atan(width / height)
 
-    sphere = Sphere(Vector3(-3, 0, -16), 2)
+    ivory = Material(Vector3(0.4, 0.4, 0.3))
+    red_bubber = Material(Vector3(0.3, 0.1, 0.1))
+
+    spheres = [
+        Sphere(Vector3(-3, 0, -16), 2, ivory),
+        Sphere(Vector3(-1.0, -1.5, -12), 2, ivory),
+        Sphere(Vector3(1.5, -0.5, -18), 3, red_bubber),
+        Sphere(Vector3(7, 5, -18), 4, red_bubber),
+        
+    ]
 
     for j in range(height):
+        y = -(2 * (j + 0.5) / height - 1) * math.tan(fov_hor / 2)
+        
         for i in range(width):
-
-            x = (2 * (i + 0.5) / width - 1) * math.tan(fov / 2.) * width / height
-            y = -(2 * (j + 0.5) / height - 1) * math.tan(fov / 2.)
-
+            x = (2 * (i + 0.5) / width - 1) * math.tan(fov_vert / 2)
+            
             dir = Vector3(x, y, -1).normalize()
-
-            frame_buffer[i + j * width] = cast_ray(Vector3(0, 0, 0), dir, sphere)
+            frame_buffer[i + j * width] = cast_ray(Vector3(0, 0, 0), dir, spheres)
 
     pack_size = width
     result = []
@@ -54,17 +95,17 @@ def render(width, height) -> bytes:
 
 
 def write_ppm(width, height, frame):
-    with open('out.ppm', 'wb') as f:
+    with open('out2.ppm', 'wb') as f:
         f.write('P6\n{} {}\n255\n'.format(width, height).encode())
         f.write(frame)
 
 
 def main():
-    width, height = 1024, 768
+    start = time.time()
+    width, height = 640, 480
     frame = render(width, height)
     write_ppm(width, height, frame)
-
-
+    print("Render took: {:.2f} sec.".format(time.time() - start))
 
 
 if __name__ == "__main__":
