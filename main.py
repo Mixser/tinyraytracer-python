@@ -16,7 +16,6 @@ def get_color(v: Vector3):
 
 
 def scene_intersct(orig, dir, spheres):
-    intersects = False
     hit, normal, material = None, None, None
     distance = sys.maxsize
 
@@ -34,8 +33,6 @@ def scene_intersct(orig, dir, spheres):
 
 
 def cast_ray(orig: Vector3, destination: Vector3, spheres: [Sphere]):
-    sphere_dist = sys.maxsize
-
     lights = [
         Light(Vector3(-20, 20,  20), 1.5)
     ]
