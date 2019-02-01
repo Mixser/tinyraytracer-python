@@ -1,5 +1,7 @@
 import math
+
 from .materials import Material
+
 
 class Sphere(object):
     __slots__ = ('center', 'radius', 'material')
@@ -13,18 +15,34 @@ class Sphere(object):
         # vector from origin to sphere center
         v = self.center - origin
 
-        pc = (dir * v) * dir
+        # if v * dir < 0:
+        #     return False, -1
 
-        dist = abs(pc * pc - v * v)
+        # lets do all magic in projection on dir axis
+
+        pc_signed_proj = dir * v  # find the coordinates of v in dir vector
+
+        # calculate distance^2 from center of sphere to dir vector
+        dist = v * v - pc_signed_proj * pc_signed_proj
 
         if dist > self.radius ** 2:
             return False, -1
 
-        c = math.sqrt(self.radius ** 2 - dist)
-        first_intersection = origin + dir * ((pc - origin).norm() - c)
+        # calculate distance from projection point to intersect with a ring
+        delta = math.sqrt(self.radius ** 2 - dist)
 
-        # TODO: check if the cam in the sphere (or sphere behined the cam)
-        return True, first_intersection.norm()
+        # first intersection
+        intersection = pc_signed_proj - delta
+
+        # if intersection behind the orig - try another
+        if intersection < 0:
+            intersection = pc_signed_proj + delta
+
+        # if intersection behind the orig - don't register intersection
+        if intersection < 0:
+            return False, -1
+
+        return True, intersection
 
     def ray_intersect(self, origin, dir):
         return self._ray_intersect(origin, dir)

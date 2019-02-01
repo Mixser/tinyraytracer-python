@@ -28,6 +28,9 @@ class Vector(object):
     def normalize(self):
         norm = self.norm()
 
+        if norm == 0:
+            return self
+
         for i in range(self.dimension):
             self[i] = self[i] / norm
 
@@ -131,3 +134,32 @@ class Vector3(Vector):
         self._coordinates[index] = value
 
 
+class Vector4(Vector):
+    __slots__ = Vector.__slots__
+
+    def __init__(self, x=0, y=0, z=0, alfa=0):
+        super(Vector4, self).__init__([x, y, z, alfa])
+
+    @property
+    def x(self):
+        return self._coordinates[0]
+
+    @property
+    def y(self):
+        return self._coordinates[1]
+
+    @property
+    def z(self):
+        return self._coordinates[2]
+
+    @property
+    def alfa(self):
+        return self._coordinates[3]
+
+    def __getitem__(self, index):
+        assert index < self.dimension
+        return self._coordinates[index]
+
+    def __setitem__(self, index, value):
+        assert index < self.dimension
+        self._coordinates[index] = value
