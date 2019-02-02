@@ -5,3 +5,5 @@ __pycache__
 *.ppm
 *.sublime-*
 *.code-workspace
+.vscode
+.DS_Store

@@ -80,6 +80,9 @@ class Vector(object):
             return self.__process_number_operation__(other, operator.mul)
         return self.__process_scalar_operation__(other, operator.mul)
 
+    def __neg__(self):
+        return self.__mul__(-1)
+
     def __rmul__(self, other):
         return self.__mul__(other)
 
