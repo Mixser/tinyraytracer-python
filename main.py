@@ -47,12 +47,12 @@ def add_objects(scene):
 def main():
     options = {
         'reflect': True, 
-        'refract': False, 
-        'max_depth': 3,
+        'refract': True, 
+        'max_depth': 4,
         'shadow': True,
         'light': True,
-        'specular_light': False,
-        'envmap': False,
+        'specular_light': True,
+        'envmap': True,
     }
     renderer = Renderer(1024, 768, options)
 
@@ -64,7 +64,7 @@ def main():
 
     frame = renderer.render(scene)
 
-    write_ppm('out_new.ppm', frame)
+    write_ppm('output/out_new.ppm', frame)
 
 
 if __name__ == "__main__":
