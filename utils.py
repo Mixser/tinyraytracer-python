@@ -32,3 +32,11 @@ def refract(v, normal, refractive_index):
         res_vector = v * eta + normal * (eta * cos_v - math.sqrt(k))
     
     return res_vector
+
+
+def cross(v1: Vector3, v2: Vector3) -> Vector3:
+    x = v1.y * v2.z - v1.z * v2.y
+    y = v1.z * v2.x - v1.x * v2.z
+    z = v1.x * v2.y - v1.y * v2.x
+
+    return Vector3(x, y, z)
