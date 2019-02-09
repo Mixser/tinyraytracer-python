@@ -4,6 +4,8 @@ from scene import Scene
 from renderer import Renderer
 
 from entities import Vector3, Vector4, Sphere, Light, Material, Panel
+from entities.objects import Duck
+from entities.model import Model
 
 def write_ppm(filename, frame):
     with open(filename, 'wb') as f:
@@ -30,12 +32,16 @@ def add_objects(scene):
     glass = Material(Vector4(0.0, 0.5, 0.1, 0.8), Vector3(0.4, 0.4, 0.3), 125.0, 1.5)
     mirror = Material(Vector4(0.0, 10.0, 0.8, 0), Vector3(1.0, 1.0, 1.0), 1425.0, 1.0)
     
+    model = Model('duck.obj')
+    duck = Duck(Vector3(-3, 0, -16), model, ivory)
+
     objects = [
         Panel(Vector3(0, -4, -20), 20, 20),
-        Sphere(Vector3(-3, 0, -16), 2, ivory),
-        Sphere(Vector3(-1, -1.5, -12), 2, glass),
-        Sphere(Vector3(1.5, -0.5, -18), 3, red_rubber),
-        Sphere(Vector3(7, 5, -18), 4, mirror),
+        duck,
+        # Sphere(Vector3(-3, 0, -16), 2, ivory),
+        # Sphere(Vector3(-1, -1.5, -12), 2, glass),
+        # Sphere(Vector3(1.5, -0.5, -18), 3, red_rubber),
+        # Sphere(Vector3(7, 5, -18), 4, mirror),
     ]
 
     for obj in objects:
@@ -46,12 +52,12 @@ def add_objects(scene):
 
 def main():
     options = {
-        'reflect': True, 
-        'refract': True, 
+        'reflect': False, 
+        'refract': False, 
         'max_depth': 4,
         'shadow': True,
         'light': True,
-        'specular_light': True,
+        'specular_light': False,
         'envmap': True,
     }
     renderer = Renderer(1024, 768, options)

@@ -114,3 +114,23 @@ class Sphere(SceneObject):
         normal = self.get_normal_at(point)
 
         return SceneIntersectionObject(intersection, point, normal, self.material)
+
+class Duck(SceneObject):
+    def __init__(self, center, model, material):
+        self._model = model
+        self._center = center
+        self._material = material
+
+    def _ray_intersect(self, origin, direction):
+        min_, max_ = self._model.get_bbox()
+        v1 = max_ - origin
+
+        if v1 * v1 < 0:
+            return None
+
+        for fi in range(self._model.triangles_count()):
+            intersecion = self._model.ray_triangle_intersect(fi, origin, direction)
+            if intersecion:
+                return SceneIntersectionObject(intersecion[0], intersecion[1], intersecion[2], self._material)
+
+        return None
