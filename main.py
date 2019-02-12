@@ -3,7 +3,7 @@ from PIL import Image
 from scene import Scene
 from renderer import Renderer
 
-from entities import Vector3, Vector4, Sphere, Light, Material, Panel
+from entities import Vector3, Vector4, Sphere, Light, Material, Panel, Box
 from entities.objects import Duck
 from entities.model import Model
 
@@ -33,10 +33,11 @@ def add_objects(scene):
     mirror = Material(Vector4(0.0, 10.0, 0.8, 0), Vector3(1.0, 1.0, 1.0), 1425.0, 1.0)
     
     model = Model('duck.obj')
-    duck = Duck(Vector3(-3, 0, -16), model, ivory)
+    duck = Duck(Vector3(-3, 0, -16), model, glass)
 
     objects = [
         Panel(Vector3(0, -4, -20), 20, 20),
+        # Box(Vector3(-3, 0, -16), Vector3(-2, 2, -14), ivory)
         duck,
         # Sphere(Vector3(-3, 0, -16), 2, ivory),
         # Sphere(Vector3(-1, -1.5, -12), 2, glass),
@@ -52,15 +53,15 @@ def add_objects(scene):
 
 def main():
     options = {
-        'reflect': False, 
-        'refract': False, 
+        'reflect': True, 
+        'refract': True, 
         'max_depth': 4,
         'shadow': True,
         'light': True,
-        'specular_light': False,
+        'specular_light': True,
         'envmap': True,
     }
-    renderer = Renderer(1024, 768, options)
+    renderer = Renderer(640, 480, options)
 
     envmap = Image.open("envmap.jpg")
     scene = Scene(envmap)

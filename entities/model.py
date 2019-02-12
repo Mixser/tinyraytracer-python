@@ -3,28 +3,36 @@ import utils
 from .objects import SceneObject, SceneIntersectionObject
 from .base import Vector3
 
-class Model(SceneObject):
+class Model(object):
     def __init__(self, filename):
         vertex = []
         faces = []
+        triangles = []
         with open(filename, 'r') as f:
             for line in f:
-                if line.startswith('v '):
-                    print(line.split(' '))
-                    (_, x, y, z, _) = line.split(' ')
+                line = line.strip()
+
+                if not line:
+                    continue
+
+                items = line.split()
+
+                x, y, z = items[1:4]
+                if items[0] == 'v':                    
                     vertex.append(Vector3(float(x), float(y), float(z)))
-                elif line.startswith('f '):
-                    print(line.split(' '))
-                    (_, x, y, z, _) = line.split(' ')
+                elif items[0] == 'f':
                     faces.append(Vector3(int(x) - 1, int(y) - 1, int(z) - 1))
+                    triangles.append(
+                        (vertex[int(x) - 1], vertex[int(y) - 1], vertex[int(z) - 1])
+                    )
 
         self._vertex = vertex
         self._faces = faces
+        self._triangles = triangles
 
     @classmethod
     def _cross(cls, v1, v2):
         return utils.cross(v1, v2)
-
 
     def vertices_count(self):
         return len(self._vertex)
@@ -48,26 +56,19 @@ class Model(SceneObject):
                 max_[j] = max(max_[j], v[j])
 
         return Vector3(*min_), Vector3(*max_)
-    
 
-    def _ray_intersect(self, origin, direction):
-        min_, max_ = self.get_bbox()
-        v1 = max_ - origin
+    def ray_intersect(self, origin, direction):
+        for fi, triangle in enumerate(self._triangles):
+            intersection = self.ray_triangle_intersect(fi, triangle, origin, direction)
 
-        if v1 * direction < 0:
-            return None
-
-
-        for fi in range(self.triangles_count()):
-            intersecion = self.ray_triangle_intersect(fi, origin, direction)
-            if intersecion:
-                return intersecion
-
+            if intersection:
+                return intersection
+            
         return None
 
-    def ray_triangle_intersect(self, fi, origin, direction):
-        edge_1 = self.point_at(self.vertex_at(fi, 1) - self.vertex_at(fi, 0))
-        edge_2 = self.point_at(self.vertex_at(fi, 2) - self.vertex_at(fi, 0))
+    def ray_triangle_intersect(self, fi, tri, origin, direction):
+        edge_1 = tri[1] - tri[0]
+        edge_2 = tri[2] - tri[0]
 
         pvec = self._cross(direction, edge_2)
 
@@ -76,22 +77,24 @@ class Model(SceneObject):
         if determinant < 1e-5:
             return None
 
-        tvec = origin - self.point_at(self.vertex_at(fi, 0))
+        tvec = origin - tri[0]
 
-        u = tvec * tvec
+        u = tvec * pvec
         if u < 0 or u > determinant:
             return None
 
-
         qvec = self._cross(tvec, edge_1)
-        v = dir * qvec
+        v = direction * qvec
 
         if v < 0 or u + v > determinant:
             return None
 
         tnear = edge_2 * qvec * (1.0/determinant)
 
-        normal = pvec.normalize()
-        return tnear, pvec, normal
+        if tnear < 1e-5:
+            return None
+
+        normal = self._cross(edge_1, edge_2).normalize()
+        return tnear, origin + tnear * direction, normal
 
     

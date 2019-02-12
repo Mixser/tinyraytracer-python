@@ -69,7 +69,64 @@ class Panel(SceneObject):
 
     def get_normal_at(self, pt):
         return Vector3(0, 1, 0)
-        
+
+
+class Box(SceneObject):
+    __slots__ = ('bounds', 'material')
+
+    def __init__(self, v1, v2, material=None):
+        self.bounds = [v1, v2]
+        self.material = material or Material()
+
+    def get_nortmal_at(self, point):
+        pass
+
+    def _ray_intersect(self, origin, dir):
+        axes = 0
+        tmin = (self.bounds[0].x - origin.x) / dir.x
+        tmax = (self.bounds[1].x - origin.x) / dir.x
+
+        tmin, tmax = min(tmin, tmax), max(tmin, tmax)
+
+        tymin = (self.bounds[0].y - origin.y) / dir.y
+        tymax = (self.bounds[1].y - origin.y) / dir.y
+
+        tymin, tymax = min(tymin, tymax), max(tymin, tymax)
+
+        if tmin > tymax or tymin > tmax:
+            return None
+
+        tmin = max(tymin, tmin)
+        tmax = min(tymax, tmax)
+
+        if tmin == tymin:
+            axes = 1
+
+        tzmin = (self.bounds[0].z - origin.z) / dir.z
+        tzmax = (self.bounds[1].z - origin.z) / dir.z
+
+        tzmin, tzmax = min(tzmin, tzmax), max(tzmin, tzmax)
+
+        if tmin > tzmax or tzmin > tmax:
+            return None
+
+        tmin = max(tzmin, tmin)
+        tmax = min(tzmax, tmax)
+
+        if tmin == tzmin:
+            axes = 2
+
+
+        if axes == 0:
+            normal = Vector3(1, 0, 0)
+        elif axes == 1:
+            normal = Vector3(0, 1, 0)
+        else:
+            normal = Vector3(0, 0, 1)
+
+
+        return SceneIntersectionObject(tmin, dir * tmin, Vector3(0, 1, 0), self.material)
+
 
 class Sphere(SceneObject):
     __slots__ = ('center', 'radius', 'material')
@@ -121,16 +178,19 @@ class Duck(SceneObject):
         self._center = center
         self._material = material
 
-    def _ray_intersect(self, origin, direction):
-        min_, max_ = self._model.get_bbox()
-        v1 = max_ - origin
+        self._box = Box(*self._model.get_bbox())
 
-        if v1 * v1 < 0:
+    def _bbox_intersection(self, origin, direction):
+        return self._box.ray_intersect(origin, direction)
+
+
+    def _ray_intersect(self, origin, direction):
+        if not self._bbox_intersection(origin, direction):
             return None
 
-        for fi in range(self._model.triangles_count()):
-            intersecion = self._model.ray_triangle_intersect(fi, origin, direction)
-            if intersecion:
-                return SceneIntersectionObject(intersecion[0], intersecion[1], intersecion[2], self._material)
+        intersection = self._model.ray_intersect(origin, direction)
+
+        if intersection:
+            return SceneIntersectionObject(*intersection, self._material)
 
         return None
