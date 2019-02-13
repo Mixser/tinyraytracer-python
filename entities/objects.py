@@ -116,16 +116,16 @@ class Box(SceneObject):
         if tmin == tzmin:
             axes = 2
 
+        # if axes == 0:
+        #     normal = Vector3(1, 0, 0)
+        # elif axes == 1:
+        #     normal = Vector3(0, 1, 0)
+        # else:
+        #     normal = Vector3(0, 0, 1)
+        #
+        # return SceneIntersectionObject(tmin, dir * tmin, normal, self.material)
 
-        if axes == 0:
-            normal = Vector3(1, 0, 0)
-        elif axes == 1:
-            normal = Vector3(0, 1, 0)
-        else:
-            normal = Vector3(0, 0, 1)
-
-
-        return SceneIntersectionObject(tmin, dir * tmin, Vector3(0, 1, 0), self.material)
+        return True
 
 
 class Sphere(SceneObject):
@@ -182,7 +182,6 @@ class Duck(SceneObject):
 
     def _bbox_intersection(self, origin, direction):
         return self._box.ray_intersect(origin, direction)
-
 
     def _ray_intersect(self, origin, direction):
         if not self._bbox_intersection(origin, direction):

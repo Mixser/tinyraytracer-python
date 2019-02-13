@@ -114,7 +114,7 @@ class Vector3(Vector):
     __slots__ = Vector.__slots__
 
     def __init__(self, x=0, y=0, z=0):
-        super(Vector3, self).__init__([x, y, z])
+        super(Vector3, self).__init__((x, y, z))
 
     @property
     def x(self):
@@ -127,13 +127,21 @@ class Vector3(Vector):
     @property
     def z(self):
         return self._coordinates[2]
+    
+    def __sub__(self, other):
+        # if isinstance(other, Vector3):
+        return Vector3(self._coordinates[0] - other._coordinates[0], self._coordinates[1] - other._coordinates[1], self._coordinates[2] - other._coordinates[2])
+        # return super(Vector3, self).__sub__(other)
+
+    def __process_scalar_operation__(self, other, operation):
+        return self._coordinates[0] * other._coordinates[0] + self._coordinates[1] * other._coordinates[1] + self._coordinates[2] * other._coordinates[2]
 
     def __getitem__(self, index):
-        assert index < self.dimension
         return self._coordinates[index]
 
     def __setitem__(self, index, value):
-        assert index < self.dimension
+        if not isinstance(self._coordinates, list):
+            self._coordinates = list(self._coordinates)
         self._coordinates[index] = value
 
 

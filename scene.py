@@ -39,7 +39,6 @@ class Scene(object):
 
         return result
 
-
     def envmap(self, origin, direction):
         width, height = self._envmap.width, self._envmap.height
 

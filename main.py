@@ -7,11 +7,13 @@ from entities import Vector3, Vector4, Sphere, Light, Material, Panel, Box
 from entities.objects import Duck
 from entities.model import Model
 
+
 def write_ppm(filename, frame):
     with open(filename, 'wb') as f:
         f.write('P6\n{} {}\n255\n'.format(frame.width, frame.height).encode())
         for line_bytes in frame.bytes:
             f.write(line_bytes)
+
 
 def add_lights(scene):
     lights = [
@@ -25,11 +27,12 @@ def add_lights(scene):
 
     return scene
 
+
 def add_objects(scene):
     ivory = Material(Vector4(0.6, 0.3, 0.1, 0), Vector3(0.4, 0.4, 0.3), 50.0, 1.0)
     red_rubber = Material(Vector4(0.9, 0.1, 0, 0), Vector3(0.3, 0.1, 0.1), 10.0, 1.0)
 
-    glass = Material(Vector4(0.0, 0.5, 0.1, 0.8), Vector3(0.4, 0.4, 0.3), 125.0, 1.5)
+    glass = Material(Vector4(0.0, 0.5, 0.1, 0.8), Vector3(0.6, 0.7, 0.8), 125.0, 1.5)
     mirror = Material(Vector4(0.0, 10.0, 0.8, 0), Vector3(1.0, 1.0, 1.0), 1425.0, 1.0)
     
     model = Model('duck.obj')
@@ -37,12 +40,11 @@ def add_objects(scene):
 
     objects = [
         Panel(Vector3(0, -4, -20), 20, 20),
-        # Box(Vector3(-3, 0, -16), Vector3(-2, 2, -14), ivory)
         duck,
-        # Sphere(Vector3(-3, 0, -16), 2, ivory),
-        # Sphere(Vector3(-1, -1.5, -12), 2, glass),
-        # Sphere(Vector3(1.5, -0.5, -18), 3, red_rubber),
-        # Sphere(Vector3(7, 5, -18), 4, mirror),
+        Sphere(Vector3(-3, 0, -16), 2, ivory),
+        Sphere(Vector3(-1, -1.5, -12), 2, glass),
+        Sphere(Vector3(1.5, -0.5, -18), 3, red_rubber),
+        Sphere(Vector3(7, 5, -18), 4, mirror),
     ]
 
     for obj in objects:
@@ -61,7 +63,7 @@ def main():
         'specular_light': True,
         'envmap': True,
     }
-    renderer = Renderer(640, 480, options)
+    renderer = Renderer(800, 600, options)
 
     envmap = Image.open("envmap.jpg")
     scene = Scene(envmap)

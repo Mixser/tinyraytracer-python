@@ -1,7 +1,7 @@
 import utils
 
-from .objects import SceneObject, SceneIntersectionObject
 from .base import Vector3
+
 
 class Model(object):
     def __init__(self, filename):

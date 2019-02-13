@@ -35,8 +35,8 @@ def refract(v, normal, refractive_index):
 
 
 def cross(v1: Vector3, v2: Vector3) -> Vector3:
-    x = v1.y * v2.z - v1.z * v2.y
-    y = v1.z * v2.x - v1.x * v2.z
-    z = v1.x * v2.y - v1.y * v2.x
+    x = v1._coordinates[1] * v2._coordinates[2] - v1._coordinates[2] * v2._coordinates[1]
+    y = v1._coordinates[2] * v2._coordinates[0] - v1._coordinates[0] * v2._coordinates[2]
+    z = v1._coordinates[0] * v2._coordinates[1] - v1._coordinates[1] * v2._coordinates[0]
 
     return Vector3(x, y, z)

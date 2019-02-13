@@ -61,9 +61,9 @@ class LightIntensityCalculator(object):
         self._options = options
         self._scene = scene
 
-    def calculate_intensity(self, origin, direction, intersection):
+    def calculate_intensity(self, origin, direction, intersection, dept):
         light_intensity = 0
-        specular_ligth_intensity = 0
+        specular_light_intensity = 0
 
         if not self._options['light']:
             return 1, 0
@@ -83,14 +83,15 @@ class LightIntensityCalculator(object):
             light_intensity += light.intensity * max(0, light_dir * intersection.normal)
 
             if self._options['specular_light']:
-                reflect_scalar =  -utils.reflect(-light_dir, intersection.normal) * direction
+                reflect_scalar = -utils.reflect(-light_dir, intersection.normal) * direction
                 reflect_scalar = max(0, reflect_scalar)
 
-                specular_ligth_intensity += math.pow(reflect_scalar, intersection.material.specular_exponent) * light_intensity
+                specular_light_intensity += math.pow(reflect_scalar, intersection.material.specular_exponent) * light_intensity
             else:
-                specular_ligth_intensity = 0
+                specular_light_intensity = 0
 
-        return light_intensity, specular_ligth_intensity
+        return light_intensity, specular_light_intensity
+
 
 class RayTracer(object):
     def __init__(self, scene, options):
@@ -116,7 +117,7 @@ class RayTracer(object):
         refraction = self._ray_refractor.calculate_refraction(origin, direction, intersection, depth)
         reflection = self._ray_reflector.calculate_reflection(origin, direction, intersection, depth)
 
-        light_intensity, specular_light_intensity = self._light_tracer.calculate_intensity(origin, direction, intersection)
+        light_intensity, specular_light_intensity = self._light_tracer.calculate_intensity(origin, direction, intersection, depth)
 
         # resut vecotr - it's a material color
         result_vector = intersection.material.diffuse_color
